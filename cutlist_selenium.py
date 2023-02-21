@@ -28,7 +28,7 @@ for region in range(10, 100, 10):
 
         # Wait for loading bar to go away
         print("Waiting for page to load...")
-        WebDriverWait(driver, 60).until(EC.invisibility_of_element_located((By.ID, "bar-loader")))
+        WebDriverWait(driver, 90).until(EC.invisibility_of_element_located((By.ID, "bar-loader")))
 
         try:
             # Look for text indicating missing certificate
