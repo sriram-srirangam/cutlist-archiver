@@ -10,12 +10,12 @@ from threading import Thread
 from utils import build_url, get_complete_url_parameter, print_page_to_pdf
 
 HIGHEST_MOVIE_ID = 100000
-N_THREADS = 2
+N_THREADS = 100
 THREAD_SIZE = HIGHEST_MOVIE_ID // N_THREADS
 
 def run_scraping(region_code: str, year_suffix: str, thread_id: int):
     lower_bound = thread_id * THREAD_SIZE
-    upper_bound = thread_id * (THREAD_SIZE + 1)
+    upper_bound = (thread_id + 1) * THREAD_SIZE
 
     options = Options()
     options.add_argument('--headless')
