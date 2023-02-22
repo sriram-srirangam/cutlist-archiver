@@ -10,7 +10,7 @@ from threading import Thread
 from utils import build_url, get_complete_url_parameter, print_page_to_pdf
 
 HIGHEST_MOVIE_ID = 100000
-N_THREADS = 10
+N_THREADS = 2
 THREAD_SIZE = HIGHEST_MOVIE_ID // N_THREADS
 
 def run_scraping(region_code: str, year_suffix: str, thread_id: int):
@@ -18,7 +18,7 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
     upper_bound = thread_id * (THREAD_SIZE + 1)
 
     options = Options()
-    options.headless = True
+    options.add_argument('--headless')
 
     driver = webdriver.Chrome(options=options)
 
@@ -36,7 +36,7 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
 
         # Wait for loading bar to go away
         print(f"{url_param} - Waiting for page to load...")
-        WebDriverWait(driver, 90).until(EC.invisibility_of_element_located((By.ID, "bar-loader")))
+        WebDriverWait(driver, 120).until(EC.invisibility_of_element_located((By.ID, "bar-loader")))
 
         try:
             # Look for text indicating missing certificate
@@ -73,10 +73,10 @@ if __name__ == "__main__":
     threads = []
     for i in range(N_THREADS):
         thread = Thread(target=run_scraping, args=(region_code, year_suffix, i))
-        threads.append((i, thread))
+        threads.append(thread)
         thread.start()
     
-    for index, thread in threads:
+    for index, thread in enumerate(threads):
         print(f"Main: before joining thread {index}")
         thread.join()
         print(f"Main: thread {index} done")
