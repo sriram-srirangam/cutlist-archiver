@@ -11,7 +11,7 @@ from threading import Thread
 
 from utils import build_url, get_complete_url_parameter, print_page_to_pdf
 
-HIGHEST_MOVIE_ID = 20000
+HIGHEST_MOVIE_ID = 1000
 N_THREADS = 20
 THREAD_SIZE = HIGHEST_MOVIE_ID // N_THREADS
 
@@ -31,7 +31,7 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
         if consecutive_misses >= 20:
             # Stop archiving movies for this thread
             with open("finished.txt", "a") as f:
-                f.write(f"Thread {thread_id} hit max attempts\n")
+                f.write(f"EARLY EXIT - Thread {thread_id} hit max attempts on ID {movie_id}, IDs: {lower_bound} : {upper_bound}\n")
             break
 
         url = build_url(region_code, year_suffix, movie_id)
@@ -71,22 +71,25 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
             
     driver.quit()
 
+    with open("finished.txt", "a") as f:
+        f.write(f"COMPLETED - Thread {thread_id} ran to completion\n")
+
 
 if __name__ == "__main__":
-    for year in range(18, 24):
-        for region in range(10, 100, 10):
-            year_suffix = str(year)
-            region_code = str(region)
-            # if year_suffix == "18" and region_code in ["10", "20"]:
-            #     continue
+    year_suffix = "18"
+    region_code = "90"
 
-            threads = []
-            for i in range(N_THREADS):
-                thread = Thread(target=run_scraping, args=(region_code, year_suffix, i))
-                threads.append(thread)
-                thread.start()
-            
-            for index, thread in enumerate(threads):
-                print(f"Main: before joining thread {index}")
-                thread.join()
-                print(f"Main: thread {index} done")
+    with open("finished.txt", "a") as f:
+        f.write("=" * 100 + "\n")
+        f.write(f"Running year {year_suffix} region {region_code}\n")
+
+    threads = []
+    for i in range(N_THREADS):
+        thread = Thread(target=run_scraping, args=(region_code, year_suffix, i))
+        threads.append(thread)
+        thread.start()
+    
+    for index, thread in enumerate(threads):
+        print(f"Main: before joining thread {index}")
+        thread.join()
+        print(f"Main: thread {index} done")
