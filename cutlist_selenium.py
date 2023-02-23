@@ -1,3 +1,5 @@
+import time
+
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
@@ -19,7 +21,9 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
 
     options = Options()
     options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
 
+    time.sleep(thread_id)
     driver = webdriver.Chrome(options=options)
 
     consecutive_misses = 0
