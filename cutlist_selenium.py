@@ -11,8 +11,8 @@ from threading import Thread
 
 from utils import build_url, get_complete_url_parameter, print_page_to_pdf
 
-HIGHEST_MOVIE_ID = 100000
-N_THREADS = 100
+HIGHEST_MOVIE_ID = 20000
+N_THREADS = 20
 THREAD_SIZE = HIGHEST_MOVIE_ID // N_THREADS
 
 def run_scraping(region_code: str, year_suffix: str, thread_id: int):
@@ -30,6 +30,8 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
     for movie_id in range(lower_bound, upper_bound):
         if consecutive_misses >= 20:
             # Stop archiving movies for this thread
+            with open("finished.txt", "a") as f:
+                f.write(f"Thread {thread_id} hit max attempts\n")
             break
 
         url = build_url(region_code, year_suffix, movie_id)
