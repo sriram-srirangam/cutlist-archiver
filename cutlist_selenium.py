@@ -73,16 +73,20 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
 
 
 if __name__ == "__main__":
-    year_suffix = "18"
-    region_code = "10"
+    for year in range(18, 24):
+        for region in range(10, 100, 10):
+            year_suffix = str(year)
+            region_code = str(region)
+            # if year_suffix == "18" and region_code in ["10", "20"]:
+            #     continue
 
-    threads = []
-    for i in range(N_THREADS):
-        thread = Thread(target=run_scraping, args=(region_code, year_suffix, i))
-        threads.append(thread)
-        thread.start()
-    
-    for index, thread in enumerate(threads):
-        print(f"Main: before joining thread {index}")
-        thread.join()
-        print(f"Main: thread {index} done")
+            threads = []
+            for i in range(N_THREADS):
+                thread = Thread(target=run_scraping, args=(region_code, year_suffix, i))
+                threads.append(thread)
+                thread.start()
+            
+            for index, thread in enumerate(threads):
+                print(f"Main: before joining thread {index}")
+                thread.join()
+                print(f"Main: thread {index} done")
