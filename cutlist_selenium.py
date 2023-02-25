@@ -37,12 +37,20 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
         url = build_url(region_code, year_suffix, movie_id)
         url_param = get_complete_url_parameter(region_code, year_suffix, movie_id)
 
-        print(f"{url_param} - Navigating to URL: {url}")
-        driver.get(url)
+        succeeded = False
+        while not succeeded:
+            try:
+                print(f"{url_param} - Navigating to URL: {url}")
+                driver.get(url)
 
-        # Wait for loading bar to go away
-        print(f"{url_param} - Waiting for page to load...")
-        WebDriverWait(driver, 120).until(EC.invisibility_of_element_located((By.ID, "bar-loader")))
+                # Wait for loading bar to go away
+                print(f"{url_param} - Waiting for page to load...")
+                WebDriverWait(driver, 120).until(EC.invisibility_of_element_located((By.ID, "bar-loader")))
+                succeeded = True
+            except:
+                with open("finished.txt", "a") as f:
+                    f.write(f"{url_param} - Retrying\n")
+                print(f"{url_param} - Retrying")
 
         try:
             # Look for text indicating missing certificate
@@ -76,7 +84,7 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
 
 
 if __name__ == "__main__":
-    year_suffix = "18"
+    year_suffix = "21"
     region_code = "90"
 
     with open("finished.txt", "a") as f:
