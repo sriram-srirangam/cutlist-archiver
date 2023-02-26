@@ -11,7 +11,7 @@ from threading import Thread
 
 from utils import build_url, get_complete_url_parameter, print_page_to_pdf
 
-HIGHEST_MOVIE_ID = 1000
+HIGHEST_MOVIE_ID = 600
 N_THREADS = 20
 THREAD_SIZE = HIGHEST_MOVIE_ID // N_THREADS
 
@@ -84,20 +84,20 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
 
 
 if __name__ == "__main__":
-    year_suffix = "21"
-    region_code = "90"
+    year_suffix = "23"
+    for region in range(20, 100, 10):
+        region_code = str(region)
+        with open("finished.txt", "a") as f:
+            f.write("=" * 100 + "\n")
+            f.write(f"Running year {year_suffix} region {region_code}\n")
 
-    with open("finished.txt", "a") as f:
-        f.write("=" * 100 + "\n")
-        f.write(f"Running year {year_suffix} region {region_code}\n")
-
-    threads = []
-    for i in range(N_THREADS):
-        thread = Thread(target=run_scraping, args=(region_code, year_suffix, i))
-        threads.append(thread)
-        thread.start()
-    
-    for index, thread in enumerate(threads):
-        print(f"Main: before joining thread {index}")
-        thread.join()
-        print(f"Main: thread {index} done")
+        threads = []
+        for i in range(N_THREADS):
+            thread = Thread(target=run_scraping, args=(region_code, year_suffix, i))
+            threads.append(thread)
+            thread.start()
+        
+        for index, thread in enumerate(threads):
+            print(f"Main: before joining thread {index}")
+            thread.join()
+            print(f"Main: thread {index} done")
