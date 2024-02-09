@@ -11,13 +11,16 @@ from threading import Thread
 
 from utils import build_url, get_complete_url_parameter, print_page_to_pdf
 
-HIGHEST_MOVIE_ID = 600
+LOWEST_MOVIE_ID = 1000
+HIGHEST_MOVIE_ID = 2000
 N_THREADS = 20
-THREAD_SIZE = HIGHEST_MOVIE_ID // N_THREADS
+THREAD_SIZE = (HIGHEST_MOVIE_ID - LOWEST_MOVIE_ID) // N_THREADS
+
+MAX_ALLOWED_MISSES = 40
 
 def run_scraping(region_code: str, year_suffix: str, thread_id: int):
-    lower_bound = thread_id * THREAD_SIZE
-    upper_bound = (thread_id + 1) * THREAD_SIZE
+    lower_bound = LOWEST_MOVIE_ID + thread_id * THREAD_SIZE
+    upper_bound = LOWEST_MOVIE_ID + (thread_id + 1) * THREAD_SIZE
 
     options = Options()
     options.add_argument('--headless')
@@ -28,7 +31,7 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
 
     consecutive_misses = 0
     for movie_id in range(lower_bound, upper_bound):
-        if consecutive_misses >= 20:
+        if consecutive_misses >= MAX_ALLOWED_MISSES:
             # Stop archiving movies for this thread
             with open("finished.txt", "a") as f:
                 f.write(f"EARLY EXIT - Thread {thread_id} hit max attempts on ID {movie_id}, IDs: {lower_bound} : {upper_bound}\n")
@@ -85,7 +88,7 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
 
 if __name__ == "__main__":
     year_suffix = "23"
-    for region in range(20, 100, 10):
+    for region in range(10, 100, 10):
         region_code = str(region)
         with open("finished.txt", "a") as f:
             f.write("=" * 100 + "\n")
