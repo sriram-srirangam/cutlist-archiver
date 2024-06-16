@@ -11,12 +11,12 @@ from threading import Thread
 
 from utils import build_url, get_complete_url_parameter, print_page_to_pdf
 
-LOWEST_MOVIE_ID = 1000
+LOWEST_MOVIE_ID = 0
 HIGHEST_MOVIE_ID = 2000
 N_THREADS = 20
 THREAD_SIZE = (HIGHEST_MOVIE_ID - LOWEST_MOVIE_ID) // N_THREADS
 
-MAX_ALLOWED_MISSES = 40
+MAX_ALLOWED_MISSES = int(0.8 * THREAD_SIZE)
 
 def run_scraping(region_code: str, year_suffix: str, thread_id: int):
     lower_bound = LOWEST_MOVIE_ID + thread_id * THREAD_SIZE
@@ -41,7 +41,8 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
         url_param = get_complete_url_parameter(region_code, year_suffix, movie_id)
 
         succeeded = False
-        while not succeeded:
+        tries = 0
+        while not succeeded and tries < 5:
             try:
                 print(f"{url_param} - Navigating to URL: {url}")
                 driver.get(url)
@@ -50,8 +51,10 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
                 print(f"{url_param} - Waiting for page to load...")
                 WebDriverWait(driver, 120).until(EC.invisibility_of_element_located((By.ID, "bar-loader")))
                 succeeded = True
-            except:
+            except Exception as e:
+                tries += 1
                 with open("finished.txt", "a") as f:
+                    f.write(f"{url_param} failed with exception {e} on try {tries}\n")
                     f.write(f"{url_param} - Retrying\n")
                 print(f"{url_param} - Retrying")
 
@@ -87,7 +90,7 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
 
 
 if __name__ == "__main__":
-    year_suffix = "23"
+    year_suffix = "24"
     for region in range(10, 100, 10):
         region_code = str(region)
         with open("finished.txt", "a") as f:
