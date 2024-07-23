@@ -1,6 +1,7 @@
 import time
 
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -11,12 +12,12 @@ from threading import Thread
 
 from utils import build_url, get_complete_url_parameter, print_page_to_pdf
 
-LOWEST_MOVIE_ID = 0
-HIGHEST_MOVIE_ID = 2000
+LOWEST_MOVIE_ID = 4000
+HIGHEST_MOVIE_ID = 6000
 N_THREADS = 20
 THREAD_SIZE = (HIGHEST_MOVIE_ID - LOWEST_MOVIE_ID) // N_THREADS
 
-MAX_ALLOWED_MISSES = int(0.8 * THREAD_SIZE)
+MAX_ALLOWED_MISSES = min(int(0.8 * THREAD_SIZE), 25)
 
 def run_scraping(region_code: str, year_suffix: str, thread_id: int):
     lower_bound = LOWEST_MOVIE_ID + thread_id * THREAD_SIZE
@@ -27,7 +28,7 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
     options.add_argument('--no-sandbox')
 
     time.sleep(thread_id)
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
     consecutive_misses = 0
     for movie_id in range(lower_bound, upper_bound):
