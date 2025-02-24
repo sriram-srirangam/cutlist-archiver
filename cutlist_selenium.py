@@ -28,7 +28,17 @@ def run_scraping(region_code: str, year_suffix: str, thread_id: int):
     options.add_argument("--no-sandbox")
 
     time.sleep(thread_id)
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    driver_created = False
+    while not driver_created:
+        try:
+            driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+            driver_created = True
+        except Exception as e:
+            lowest_url_param = get_complete_url_parameter(
+                region_code, year_suffix, lower_bound
+            )
+            print(f"{lowest_url_param} - Failed to create driver with exception {e}\n")
+            print(f"{lowest_url_param} - Retrying driver creation\n")
 
     consecutive_misses = 0
     for movie_id in range(lower_bound, upper_bound):
@@ -115,7 +125,7 @@ if __name__ == "__main__":
         )
         N_THREADS = 20
         THREAD_SIZE = (HIGHEST_MOVIE_ID - LOWEST_MOVIE_ID) // N_THREADS
-        MAX_ALLOWED_MISSES = min(int(0.8 * THREAD_SIZE), 25)
+        MAX_ALLOWED_MISSES = max(min(int(0.8 * THREAD_SIZE), 25), 1)
 
         with open("finished.txt", "a") as f:
             f.write("=" * 100 + "\n")

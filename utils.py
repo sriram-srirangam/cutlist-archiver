@@ -33,7 +33,15 @@ def print_page_to_pdf(
         os.makedirs(path)
     file_path = os.path.join(path, f"{get_padded_movie_id(movie_id)}.pdf")
 
-    encoded_pdf = driver.print_page()
+    print_succeeded = False
+    while not print_succeeded:
+        try:
+            encoded_pdf = driver.print_page()
+            print_succeeded = True
+        except Exception as e:
+            url_param = get_complete_url_parameter(region_code, year_suffix, movie_id)
+            print(f"{url_param} - Failed printing with exception {e}")
+            print(f"{url_param} - Retrying printing")
     with open(file_path, "wb") as fout:
         fout.write(base64.b64decode(encoded_pdf))
 
@@ -87,4 +95,4 @@ def get_predicted_max_certificate_id_for_region_in_current_year(
     if max_certificate_id is None:
         return None
 
-    return int(max_certificate_id * (day_of_year / days_in_year))
+    return max(int(max_certificate_id * (day_of_year / days_in_year)), 100)
